@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cinema.store.cartDAO">
+
+<insert id='insertcart'>
+insert into cart set customer_id=#{param1}, item_id=#{param2}, qty=#{param3}, total=#{param4}
+
+</insert>
+<select id='selectcart' resultType="com.cinema.store.cartDTO">
+
+SELECT 
+    a.item_id, 
+    SUM(a.qty) AS qty, 
+    SUM(a.total) AS total,  
+    b.item_name, 
+    b.composition, 
+    b.discount_price, 
+    b.price, 
+    b.image_path, 
+    c.uid
+FROM  cart a
+JOIN item b ON a.item_id = b.id
+JOIN customer c ON a.customer_id = c.uid
+WHERE c.uid =#{param1}
+GROUP BY  a.item_id 
+order by item_id
+</select>
+<delete id='deletecart'>
+DELETE FROM cart
+WHERE item_id =#{param1} AND customer_id =#{param2}
+</delete>
+<delete id="deletecart1"> DELETE FROM cart WHERE item_id =#{param1} AND customer_id =#{param2}</delete>
+<select id="countcart" resultType="_int">
+select count(DISTINCT item_id) from cart where customer_id=#{param1}
+</select>
+<select id="selectitem" resultType="com.cinema.store.cartDTO">
+select id,price, discount_price, composition, item_name, image_path from item where id=#{param1}
+</select>
+<select id="checkitem" resultType="com.cinema.store.cartDTO">
+SELECT 
+    COUNT(DISTINCT item_id) AS item_count,
+    SUM(CASE WHEN item_id =#{param2} THEN qty ELSE 0 END) AS item_qty
+FROM cart
+WHERE customer_id =#{param1}
+
+</select>
+</mapper>
